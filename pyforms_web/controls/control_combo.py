@@ -12,6 +12,7 @@ class ControlCombo(ControlBase):
 
         self._types = []
         self._items = collections.OrderedDict()
+        self._last_items = None
         items = kwargs.get('items', [])
         for item in items:
             self.add_item(*item)
@@ -48,13 +49,25 @@ class ControlCombo(ControlBase):
         
         return self
 
-
     def clear_items(self):
         self._items = collections.OrderedDict()
         self._types = []
         self._value = None
 
         self.mark_to_update_client()
+
+    def delete(self, value):
+        # allow removal of one or multiple items
+        # save latest removed items in _last_items
+        if isinstance(value, str):
+            self._last_items = self._items.pop(value)
+            self.mark_to_update_client()
+        elif isinstance(value, list):
+            for v in value:
+                self._last_items = []
+                if isinstance(v, str): 
+                    self._last_items.append(self._items.pop(value))
+            self.mark_to_update_client()                
 
     @property
     def items(self): return self._items.values()
@@ -77,8 +90,7 @@ class ControlCombo(ControlBase):
                     if self._init_form_called:
                         
                         self.changed_event()
-                
-        
+    
     @property
     def text(self): return ""
 

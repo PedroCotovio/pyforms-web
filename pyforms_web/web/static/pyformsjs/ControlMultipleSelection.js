@@ -7,7 +7,6 @@ class ControlMultipleSelection extends ControlBase{
 		this.flag_exec_on_change_event = false;
 		//this.jquery().dropdown('clear');
 		this.jquery().dropdown('set exactly', value);
-		console.log(value);
 		this.flag_exec_on_change_event = true;
 	};
 

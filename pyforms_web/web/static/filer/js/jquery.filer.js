@@ -883,9 +883,13 @@
                                     input.val(val);
                                 }
                             },
-                            callback = function(el, id) {
+                            callback = function(el, id) {    
                                 var item = f._itFl[id],
                                     val = [];
+                                
+                                if(typeof item == "undefined"){
+                                    return;
+                                }
 
                                 if (item.file._choosed || item.file._appended || item.uploaded) {
                                     f._itFr.push(item);
@@ -990,9 +994,10 @@
                                         a = a.replace(/ /g, '');
                                         if (a.match(/(.*?)\|limitTo\:(\d+)/)) {
                                             return a.replace(/(.*?)\|limitTo\:(\d+)/, function(match, a, b) {
+                                                console.log(opts);
                                                 var a = (opts[a] ? opts[a] : ""),
                                                     str = a.substring(0, b);
-                                                str = (a.length > str.length ? str.substring(0, str.length - 3) + "..." : str);
+                                                str = (a.length > str.length ? str.substring(0, str.length - 5) + "(...)" + '.' + opts['extension']: str);
                                                 return str;
                                             });
                                         } else {
@@ -1057,8 +1062,8 @@
         theme: 'default',
         templates: {
             box: '<ul class="jFiler-items-list jFiler-items-default"></ul>',
-            item: '<li class="jFiler-item"><div class="jFiler-item-container"><div class="jFiler-item-inner"><div class="jFiler-item-icon pull-left">{{fi-icon}}</div><div class="jFiler-item-info pull-left"><div class="jFiler-item-title" title="{{fi-name}}">{{fi-name | limitTo:30}}</div><div class="jFiler-item-others"><span>size: {{fi-size2}}</span><span>type: {{fi-extension}}</span><span class="jFiler-item-status">{{fi-progressBar}}</span></div><div class="jFiler-item-assets"><ul class="list-inline"><li><a class="icon-jfi-trash jFiler-item-trash-action"></a></li></ul></div></div></div></div></li>',
-            itemAppend: '<li class="jFiler-item"><div class="jFiler-item-container"><div class="jFiler-item-inner"><div class="jFiler-item-icon pull-left">{{fi-icon}}</div><div class="jFiler-item-info pull-left"><a href="{{fi-url}}" target="_blank" class="jFiler-item-title">{{fi-name | limitTo:35}}</a><div class="jFiler-item-others"><span>size: {{fi-size2}}</span><span>type: {{fi-extension}}</span><span class="jFiler-item-status"></span></div><div class="jFiler-item-assets"><ul class="list-inline"><li><a class="icon-jfi-trash jFiler-item-trash-action"></a></li></ul></div></div></div></div></li>',
+            item: '<li class="fdx jFiler-item"> <div class=jFiler-item-container> <div class=jFiler-item-inner> <div class=jFiler-item-inner> <div class="jFiler-item-icon pull-left">{{fi-icon}}</div> <div class="jFiler-item-icon pull-left">{{fi-icon}}</div> </div> <div class="jFiler-item-info pull-left"> <div class=jFiler-item-title title={{fi-name}}>{{fi-name | limitTo:10}}</div> <div class=jFiler-item-others><span>size: {{fi-size2}}</span><span>type: {{fi-extension}}</span><span class=jFiler-item-status>{{fi-progressBar}}</span></div> <div class=jFiler-item-assets> <ul class=list-inline> <li><a class="icon-jfi-trash jFiler-item-trash-action"></a></li> </ul> </div> </div> </div> </div> </li>',
+            itemAppend: '<li class="jFiler-item"><div class="jFiler-item-container"><div class="jFiler-item-inner"><div class="jFiler-item-icon pull-left">{{fi-icon}}</div><div class="jFiler-item-info pull-left"><a href="{{fi-url}}" target="_blank" class="jFiler-item-title">{{fi-name | limitTo:15}}</a><div class="jFiler-item-others"><span>size: {{fi-size2}}</span><span>type: {{fi-extension}}</span><span class="jFiler-item-status"></span></div><div class="jFiler-item-assets"><ul class="list-inline"><li><a class="icon-jfi-trash jFiler-item-trash-action"></a></li></ul></div></div></div></div></li>',
             progressBar: '<div class="bar"></div>',
             itemAppendToEnd: false,
             removeConfirmation: true,

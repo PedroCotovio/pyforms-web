@@ -58,7 +58,7 @@ class ControlMultipleSelection(ControlBase):
         for v in value:
             if len(v.strip())>0:
                 values.append(v)
-
+        
         if not server_change:
             properties.update({'value':values,'server_change': server_change})
             ControlBase.deserialize(self, properties)

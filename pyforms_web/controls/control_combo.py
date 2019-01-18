@@ -27,7 +27,8 @@ class ControlCombo(ControlBase):
         return "new ControlCombo('{0}', {1})".format( self._name, simplejson.dumps(self.serialize()) )
     
     def add_item(self, label, value=ValueNotSet):
-        if self._items==None: self._items=collections.OrderedDict()
+        if self._items == None:
+            self._items=collections.OrderedDict()
         
         # The value for the item was not set, so it will use the label as a value 
         if isinstance(value, ValueNotSet):
@@ -70,14 +71,17 @@ class ControlCombo(ControlBase):
             self.mark_to_update_client()                
 
     @property
-    def items(self): return self._items.values()
+    def items(self):
+        return self._items.values()
 
     @property
-    def values(self): return self._items.items()
+    def values(self):
+        return self._items.items()
 
     @property
     def value(self): 
-        if self._value==fields.NOT_PROVIDED: return None
+        if self._value == fields.NOT_PROVIDED:
+            return None
         return self._value
 
     @value.setter
@@ -88,7 +92,6 @@ class ControlCombo(ControlBase):
                     self._value = self._types[i](val)
                     self.mark_to_update_client()
                     if self._init_form_called:
-                        
                         self.changed_event()
     
     @property
@@ -104,12 +107,15 @@ class ControlCombo(ControlBase):
     
     def __convert(self, value):
         if isinstance(value, bool):
-            if value==True:  value = 'true'
-            if value==False: value = 'false'
-            if value==None:  value = 'null'
+            if value == True:
+                value = 'true'
+            if value == False:
+                value = 'false'
+            if value == None:
+                value = 'null'
         elif isinstance(value, ValueNotSet):
             value = 'null'
-        elif value==fields.NOT_PROVIDED:
+        elif value == fields.NOT_PROVIDED:
             value = 'null'
         else:
             value = str(value)
@@ -121,11 +127,7 @@ class ControlCombo(ControlBase):
         items = []
         for key, value in self._items.items():
             items.append({'text': key, 'value': self.__convert(value), 'name': key }) 
-        
         value = self._value
-        
 
         data.update({ 'items': items, 'value': self.__convert(value) })
         return data
-        
-

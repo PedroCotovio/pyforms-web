@@ -5,6 +5,19 @@ class ControlFileUpload extends ControlBase{
 		html += '<input type="file" name="'+this.name+'" id="'+this.control_id()+'" placeholder="'+this.properties.label+'" >';
 		html += "</div>";
 		
+		var captions = $.fn.filer.defaults['captions'];
+		var templates = $.fn.filer.defaults['templates'];
+		var regex = /limitTo:15/gi;
+		var limit_name = "limitTo:" + this.properties.limit_name;
+
+		templates['itemAppend'] = templates['itemAppend'].replace(regex, limit_name)
+
+		captions['button'] = this.properties.button ? this.properties.button : $.fn.filer.defaults['captions']['button']
+		captions['feedback'] = this.properties.feedback ? this.properties.feedback : $.fn.filer.defaults['captions']['feedback']
+		captions['feedback2'] = this.properties.feedback2 ? this.properties.feedback2 : $.fn.filer.defaults['captions']['feedback2']
+		captions['drop'] = this.properties.drop ? this.properties.drop : $.fn.filer.defaults['captions']['drop']
+		captions['remove_confirmation'] = this.properties.remove_confirmation ? this.properties.remove_confirmation : $.fn.filer.defaults['captions']['remove_confirmation']
+		
 		this.jquery_place().replaceWith(html);
 		var self = this;
 		this.jquery().filer({

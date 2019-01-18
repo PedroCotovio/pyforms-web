@@ -22,6 +22,9 @@ class ControlText(ControlBase):
         Event called when the Enter key is pressed
         """
         pass
+    
+    def clear(self):
+        self.value = ''
 
     def serialize(self):
         res = super(ControlText, self).serialize()

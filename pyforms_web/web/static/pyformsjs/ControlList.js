@@ -41,20 +41,23 @@ class ControlList extends ControlBase{
 		if(this.properties.label_visible) html += '<label>&nbsp;</label>';
 		html += "<div style='overflow-x: auto;' ><table class='ui selectable celled table "+this.properties.css+" ControlList' id='"+this.control_id()+"' >";
 		
+		var row_header_color = this.properties.row_header_color;
+
 		// GENERATE THE HEADER
 		html += "<thead>";
-		html += "<tr>";
+		html += `<tr>`;
 		var colsalign = this.properties.columns_align;
 		var colssizes = this.properties.columns_size;
 		var titles 	  = this.properties.horizontal_headers;
 		for(var i=0; i<titles.length; i++){
-			html += `<th style='${(colssizes)?`width:${colssizes[i]}`:''}; ${(colsalign)?`text-align:${colsalign[i]}`:''}' >${titles[i]}</th>`;
+			html += `<th style='background-color:${row_header_color};${(colssizes)?`width:${colssizes[i]}`:''}; ${(colsalign)?`text-align:${colsalign[i]}`:''}' >${titles[i]}</th>`;
 		};
 		html += "</tr>";
 		html += "</thead>";
 		// END GENERATE THE HEADER
 
 		var data = this.properties.value;
+		var row_color = this.properties.row_colors;
 		
 		html += "<tbody></div>";
 		if(data!=undefined)
@@ -65,7 +68,7 @@ class ControlList extends ControlBase{
 				var length = 0;
 				if(data[i]) length = data[i].length;
 				for(var j=0; j<length; j++)
-					html += selected?`<td style='${(colsalign)?`text-align:${colsalign[j]}`:''}' class='active' >${data[i][j]}</td>`:`<td style='${(colsalign)?`text-align:${colsalign[j]}`:''}' >${data[i][j]}</td>`;
+					html += selected?`<td style='${(row_color[i])?`background-color:${row_color[i]}`:''};${(colsalign)?`text-align:${colsalign[j]}`:''}' class='active' >${data[i][j]}</td>`:`<td style='${(row_color[i])?`background-color:${row_color[i]}`:''};${(colsalign)?`text-align:${colsalign[j]}`:''}' >${data[i][j]}</td>`;
 				
 				if(length<titles.length) 
 					for(var j=length; j<titles.length; j++) 

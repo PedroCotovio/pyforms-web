@@ -33,7 +33,9 @@ class PyformsManager{
         this.layout_places = [];
 
         this.applications = [];
+        
         /*
+
         $.ajaxSetup({async: false, cache: true});
 
         //$.getStylesheet("/static/video-js.css");
@@ -131,6 +133,7 @@ class PyformsManager{
         $.getStylesheet("/static/filer/css/jquery.filer-dragdropbox-theme.css");
 
         $.ajaxSetup({async: true, cache: false});
+
         */
 
         setInterval(this.garbage_collector, 5000); //Run the garbage collector for times to times.

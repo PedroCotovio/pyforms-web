@@ -15,12 +15,8 @@ class ControlCombo(ControlBase):
 
         self._types = []
         self._items = collections.OrderedDict()
-<<<<<<< HEAD
         self._last_items = None
         items = kwargs.get('items', [])
-=======
-        items = kwargs.get("items", [])
->>>>>>> v4
         for item in items:
             self.add_item(*item)
 
@@ -37,15 +33,9 @@ class ControlCombo(ControlBase):
 
     def add_item(self, label, value=ValueNotSet):
         if self._items == None:
-<<<<<<< HEAD
-            self._items=collections.OrderedDict()
-        
-        # The value for the item was not set, so it will use the label as a value 
-=======
             self._items = collections.OrderedDict()
 
         # The value for the item was not set, so it will use the label as a value
->>>>>>> v4
         if isinstance(value, ValueNotSet):
             value = label
         else:
@@ -63,11 +53,8 @@ class ControlCombo(ControlBase):
         else:
             self.add_item(val)
 
-<<<<<<< HEAD
-=======
         return self
 
->>>>>>> v4
     def clear_items(self):
         self._items = collections.OrderedDict()
         self._types = []
@@ -97,11 +84,7 @@ class ControlCombo(ControlBase):
         return self._items.items()
 
     @property
-<<<<<<< HEAD
-    def value(self): 
-=======
     def value(self):
->>>>>>> v4
         if self._value == fields.NOT_PROVIDED:
             return None
         return self._value
@@ -115,15 +98,10 @@ class ControlCombo(ControlBase):
                     self._value = value
                     self.mark_to_update_client()
                     if self._init_form_called:
-<<<<<<< HEAD
-                        self.changed_event()
-    
-=======
 
                         self.changed_event()
                     break
 
->>>>>>> v4
     @property
     def text(self):
         return ""
@@ -144,19 +122,12 @@ class ControlCombo(ControlBase):
             return None
         """
         if isinstance(value, bool):
-<<<<<<< HEAD
             if value == True:
                 value = 'true'
             if value == False:
                 value = 'false'
             if value == None:
                 value = 'null'
-=======
-            if value==True:  value = 'true'
-            if value==False: value = 'false'
-            if value==None:  value = 'null'
-
->>>>>>> v4
         elif isinstance(value, ValueNotSet):
             value = 'null'
         elif value == fields.NOT_PROVIDED:
@@ -170,12 +141,8 @@ class ControlCombo(ControlBase):
         data = ControlBase.serialize(self)
         items = []
         for key, value in self._items.items():
-<<<<<<< HEAD
-            items.append({'text': key, 'value': self.__convert(value), 'name': key }) 
-=======
             items.append({"text": key, "value": self.__convert(value), "name": key})
 
->>>>>>> v4
         value = self._value
 
         data.update({"items": items, "value": self.__convert(value)})

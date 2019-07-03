@@ -21,16 +21,11 @@ class ControlFileUpload(ControlBase):
 	@property
 	def filepath(self):
 		if self.value:
-<<<<<<< HEAD
-			return os.path.join(settings.MEDIA_ROOT, self.value[len(settings.MEDIA_URL):])
-=======
 			return os.path.join( settings.MEDIA_ROOT, self.value[len(settings.MEDIA_URL):] )
->>>>>>> v4
 		else:
 			return None
 
 	def serialize(self):
-<<<<<<< HEAD
 		data 	  = super(ControlFileUpload, self).serialize()
 		data.update({'button':self._button,
 					 'feedback':self._feedback,
@@ -39,9 +34,6 @@ class ControlFileUpload(ControlBase):
 					 'remove_confirmation':self._remove_confirmation,
 					 'limit_name': self._limit_name,})
 
-=======
-		data = super(ControlFileUpload, self).serialize()
->>>>>>> v4
 		if self.value:
 			try:
 				file_data = {

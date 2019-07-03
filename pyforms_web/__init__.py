@@ -4,10 +4,14 @@
 __author__      = "Ricardo Ribeiro"
 __credits__     = ["Ricardo Ribeiro"]
 __license__     = 'GNU GPLv3'
-__version__     = "4.0.7"
+__version__     = "4.1.3"
 __maintainer__  = "Ricardo Ribeiro"
 __email__       = "ricardojvr@gmail.com"
 __status__      = "Development"
+
+
+from confapp import conf;
+conf += 'pyforms_web.settings'
 
 #force the load of the local settings if exists
 try:
@@ -15,5 +19,3 @@ try:
     conf += local_settings
 except:
     pass
-
-from confapp import conf; conf += 'pyforms_web.settings'

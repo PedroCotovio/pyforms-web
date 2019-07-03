@@ -115,6 +115,7 @@ class ControlQueryList extends ControlBase{
                     choose_button.children('span').html(filter_value);
                     
                     self.collect_filters_values();
+                    self.update_server_flag = true;
                     self.basewidget.fire_event( self.name, 'filter_changed_event' );
                 });
 
@@ -127,10 +128,21 @@ class ControlQueryList extends ControlBase{
                     $(this).hide();
 
                     self.collect_filters_values();
+                    self.update_server_flag = true;
                     self.basewidget.fire_event( self.name, 'filter_changed_event' );
                 });
             }
         }
+    }
+
+    pad(number, size){
+        var s = String(number);
+        while (s.length < (size || 2)) {s = "0" + s;}
+        return s;
+    }
+
+    formatdate(date){
+        return date.getFullYear()+'-'+this.pad(date.getMonth()+1,2)+'-'+this.pad(date.getDate(),2);
     }
 
     collect_filters_values(){
@@ -149,8 +161,15 @@ class ControlQueryList extends ControlBase{
                     var end   = $(`#${this.control_id()}-filter-${filter.column} .end`).val();
                     var filter_value = begin?`${filter.column}__gte=${begin}`:'';
                     filter_value += (begin && end)?`&`:'';
-                    filter_value += end?`${filter.column}__lte=${end}`:'';
 
+                    if( end ){
+                        end = new Date(end);
+                        end.setDate( end.getDate()+1 );
+                    }else{
+                        end = undefined;
+                    }
+
+                    filter_value += end?`${filter.column}__lte=${this.formatdate(end)}`:'';
                     break;
             }
 
@@ -174,6 +193,7 @@ class ControlQueryList extends ControlBase{
     ////////////////////////////////////////////////////////////////////////////////
 
     init_control(){
+        this.update_server_flag = false;
 
         var html = "<div id='"+this.place_id()+"' class='field control ControlQueryList'>";
 
@@ -223,6 +243,7 @@ class ControlQueryList extends ControlBase{
             $("#"+this.control_id()+"-search").keypress(function (ev) {
                 var keycode = (ev.keyCode ? ev.keyCode : ev.which);
                 if (keycode == '13') {
+                    self.update_server_flag = true;
                     self.properties.search_field_key = $(this).val();
                     self.basewidget.fire_event( self.name, 'filter_changed_event' );
                     return false;
@@ -232,6 +253,8 @@ class ControlQueryList extends ControlBase{
         $( "#"+this.place_id()+" .queryset-filter" ).dropdown({
             onChange: function(value, text, selectedItem){
                 self.collect_filters_values();
+                self.update_server_flag = true;
+
                 self.basewidget.fire_event( self.name, 'filter_changed_event' );
             },
             fullTextSearch: 'exact',
@@ -268,6 +291,8 @@ class ControlQueryList extends ControlBase{
                 };          
             });
 
+
+            self.update_server_flag = true;
             self.basewidget.fire_event( self.name, 'sort_changed_event' );
         });
 
@@ -360,7 +385,9 @@ class ControlQueryList extends ControlBase{
 
         $("#"+this.control_id()+" tbody td" ).click(function(){
             if( !$(this).hasClass('active') ){
-                self.properties.selected_row_id = $(this).parent().attr('row-id');
+                var new_id = $(this).parent().attr('row-id');
+                self.update_server_flag = new_id!=self.properties.selected_row_id;
+                self.properties.selected_row_id = new_id;
                 //self.jquery().children('td').removeClass('active');
                 //self.jquery().children('tr[row-id='+self.properties.selected_row_id+'] td').addClass('active');
                 self.basewidget.fire_event( self.name, 'item_selection_changed_client_event' );
@@ -369,6 +396,7 @@ class ControlQueryList extends ControlBase{
 
         $("#"+this.control_id()+" .pagination .item" ).click(function(){
             if( !$(this).hasClass('active') ){
+                self.update_server_flag = true;
                 self.properties.pages.current_page = $(this).attr('pageindex');
                 self.basewidget.fire_event( self.name, 'page_changed_event' );
             }
@@ -379,4 +407,14 @@ class ControlQueryList extends ControlBase{
         });
         
     };
+
+    update_server(){
+        return this.update_server_flag;
+    }
+
+    serialize(){
+        var data = super.serialize();
+        this.update_server_flag = false;
+        return data;
+    }
 }

@@ -12,6 +12,7 @@ from .controls.control_combo                  import ControlCombo
 from .controls.control_date                   import ControlDate
 from .controls.control_datetime               import ControlDateTime
 from .controls.control_dir                    import ControlDir
+from .controls.control_decimal                import ControlDecimal
 from .controls.control_email                  import ControlEmail
 from .controls.control_emptywidget            import ControlEmptyWidget
 from .controls.control_feed                   import ControlFeed
@@ -45,9 +46,8 @@ from .controls.control_visvis                 import ControlVisVis
 from .controls.control_workflow               import ControlWorkflow 
 from .controls.control_img                    import ControlImg
 from .controls.control_tree                   import ControlTree
-
+from .controls.control_search                 import ControlSearch
 from .controls.control_playerjs               import ControlPlayerJs
-
 
 try:
     from .controls.control_image              import ControlImage

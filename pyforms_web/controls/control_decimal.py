@@ -1,7 +1,7 @@
 from pyforms_web.controls.control_base import ControlBase
-import simplejson
+import simplejson, decimal
 
-class ControlFloat(ControlBase):
+class ControlDecimal(ControlBase):
 
 	def init_form(self):
 		return """new ControlFloat('{0}', {1})""".format(
@@ -16,8 +16,5 @@ class ControlFloat(ControlBase):
 
         :param dict properties: Serialized data to load.
         """
-		super().deserialize(properties)
-
-		self.value = float(
-			properties.get('value', None)
-		)
+		str_val = properties.get('value', None)
+		self.value = decimal.Decimal(str_val) if str_val else None

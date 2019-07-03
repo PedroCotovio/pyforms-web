@@ -1,4 +1,5 @@
 import datetime
+from datetime import date
 from pyforms_web.controls.control_base import ControlBase
 import simplejson
 
@@ -18,13 +19,17 @@ class ControlDate(ControlBase):
             if isinstance(value, str) and len(value.strip())==0:
                 value = None
 
-            if value is not None and not isinstance(value, datetime.date):
+            if value is not None and isinstance(value, str):
                 try:
-                    value = parse_datetime(value)
-                    value = timezone.localtime(value)
-                    value = value.date()
+                    value = datetime.datetime.strptime(value, '%Y%m%d')
                 except:
-                    raise Exception('The value is not a valid date')
+                    try:
+                        value = datetime.datetime.strptime(value, '%Y-%m-%d')
+                    except Exception as e:
+                        raise Exception('The value is not a valid date: '+value)
+            if value and isinstance(value, datetime.datetime):
+                value = value.date()
+
 
             ControlBase.value.fset(self, value)
             self.error = False
@@ -35,7 +40,7 @@ class ControlDate(ControlBase):
 
     def serialize(self):
         data = ControlBase.serialize(self)
-        
+
         if self.value:
             data.update({'value': self.value.isoformat()}  )
         return data

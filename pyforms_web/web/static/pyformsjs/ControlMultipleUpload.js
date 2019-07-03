@@ -1,23 +1,9 @@
-class ControlFileUpload extends ControlBase{
+class ControlMultipleUpload extends ControlBase{
 
 	init_control(){
-		var html = "<div class='field control ControlFileUpload' id='"+this.place_id()+"' >"
-		if(this.properties.label_visible) html += "<label>"+this.properties.label+"</label>";
+		var html = "<div class='field control ControlMultipleUpload' id='"+this.place_id()+"' ><label>"+this.properties.label+"</label>";
 		html += '<input type="file" name="'+this.name+'" id="'+this.control_id()+'" placeholder="'+this.properties.label+'" >';
 		html += "</div>";
-		
-		var captions = $.fn.filer.defaults['captions'];
-		var templates = $.fn.filer.defaults['templates'];
-		var regex = /limitTo:15/gi;
-		var limit_name = "limitTo:" + this.properties.limit_name;
-
-		templates['itemAppend'] = templates['itemAppend'].replace(regex, limit_name)
-
-		captions['button'] = this.properties.button ? this.properties.button : $.fn.filer.defaults['captions']['button']
-		captions['feedback'] = this.properties.feedback ? this.properties.feedback : $.fn.filer.defaults['captions']['feedback']
-		captions['feedback2'] = this.properties.feedback2 ? this.properties.feedback2 : $.fn.filer.defaults['captions']['feedback2']
-		captions['drop'] = this.properties.drop ? this.properties.drop : $.fn.filer.defaults['captions']['drop']
-		captions['remove_confirmation'] = this.properties.remove_confirmation ? this.properties.remove_confirmation : $.fn.filer.defaults['captions']['remove_confirmation']
 		
 		this.jquery_place().replaceWith(html);
 		var self = this;
@@ -28,11 +14,13 @@ class ControlFileUpload extends ControlBase{
 				type: 'POST',
 				enctype: 'multipart/form-data', //Request enctype {String}
 				synchron: false, //Upload synchron the files
-				beforeSend: function(){self.basewidget.loading();}, //A pre-request callback function {Function}
+				beforeSend: function(){
+					//self.basewidget.loading();
+				}, //A pre-request callback function {Function}
 				success: function(data, itemEl, listEl, boxEl, newInputEl, inputEl, id){
-					self.properties.new_value = data.metas[0].file;
-					self.basewidget.fire_event( self.name, 'update_control_event' );
-					self.basewidget.not_loading();
+					//self.properties.new_value = data.metas[0].file;
+					//self.basewidget.fire_event( self.name, 'update_control_event' );
+					//self.basewidget.not_loading();
 				},
 				error: null, //A function to be called if the request fails {Function}
 				statusCode: null, //An object of numeric HTTP codes {Object}
@@ -41,7 +29,6 @@ class ControlFileUpload extends ControlBase{
 				
 			},
 			showThumbs: true,
-			limit: 1,
 			addMore: true,
 			allowDuplicates: false,
 			onRemove: function(itemEl, file, id, listEl, boxEl, newInputEl, inputEl){

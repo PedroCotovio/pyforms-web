@@ -4,14 +4,9 @@ except:
     pass
 
 from .controls.control_base     import ControlBase
-from .controls.control_file     import ControlFile
-from .controls.control_slider   import ControlSlider
-from .controls.control_text     import ControlText
-from .controls.control_checkbox import ControlCheckBox
 from .controls.control_label    import ControlLabel
 from .controls.control_button   import ControlButton
 
-from .web.applications import ApplicationsLoader
 from .web.middleware   import PyFormsMiddleware
 
 from pyforms_web.organizers import no_columns, segment
@@ -37,6 +32,9 @@ class BaseWidget(object):
     
     #: str: Time in milliseconds to refresh the application.
     REFRESH_TIMEOUT = None
+
+    #: list(str): List of django groups authorized to run the application
+    AUTHORIZED_GROUPS = None
 
     #: str: Css classes to add to the form.
     CSS = ''
@@ -76,7 +74,7 @@ class BaseWidget(object):
 
         self.init_form_result = None
          
-        self._uid =  self.UID if hasattr(self, 'UID') else str(uuid.uuid4())
+        self._uid =  self.UID if hasattr(self, 'UID') and self.UID else str(uuid.uuid4())
 
         self._messages        = []
         self._js_code2execute = [];
@@ -425,7 +423,7 @@ class BaseWidget(object):
         """
         self.message(msg, title, msg_type='error')
 
-    def message_popup(self, msg, title='', buttons=None, handler=None, msg_type='success'):
+    def message_popup(self, msg, title='', buttons=None, handler=None, msg_type=''):
         """
         Show a popup message window
         
@@ -442,7 +440,7 @@ class BaseWidget(object):
                 ...
 
         """
-        self._active_popup_msg = PopupWindow(title, msg, buttons, handler, msg_type='success', parent_win=self)
+        self._active_popup_msg = PopupWindow(title, msg, buttons, handler, msg_type=msg_type, parent_win=self)
         return self._active_popup_msg
     def success_popup(self, msg, title='', buttons=None, handler=None):
         """
@@ -453,7 +451,7 @@ class BaseWidget(object):
         :param list(str) buttons: List of buttons labels to create in the popup window.
         :param method handler: Method that will handle the press of the buttons.
         """
-        return self.message_popup(msg, title, buttons, handler, msg_type='success')
+        return self.message_popup(msg, title, buttons, handler, msg_type='positive')
     def info_popup(self, msg, title='', buttons=None, handler=None):
         """
         Show a popup info message window
@@ -483,7 +481,7 @@ class BaseWidget(object):
         :param list(str) buttons: List of buttons labels to create in the popup window.
         :param method handler: Method that will handle the press of the buttons.
         """
-        return self.message_popup(msg, title, buttons, handler, msg_type='alert')
+        return self.message_popup(msg, title, buttons, handler, msg_type='error')
 
     
     ##########################################################################
@@ -538,8 +536,8 @@ class BaseWidget(object):
 
         lock = filelock.FileLock(conf.PYFORMS_WEB_LOCKFILE)
         with lock.acquire(timeout=4):
-            with open(app_path, 'wb') as f: 
-                dill.dump(self, f)
+            with open(app_path, 'wb') as f:
+                dill.dump(self, f, protocol=4)
 
     def execute_js(self, code):
         """
@@ -569,8 +567,8 @@ class BaseWidget(object):
         """
         widgets = []
 
-        if hasattr(self, 'parent') and isinstance(self.parent, (str,str)):
-            self.parent = PyFormsMiddleware.get_instance(self.parent)
+        #if hasattr(self, 'parent') and isinstance(self.parent, str):
+        #    self.parent = PyFormsMiddleware.get_instance(self.parent)
     
 
         for key, value in params.items():
@@ -627,6 +625,9 @@ class BaseWidget(object):
                 except:
                     pass
 
+        if self.parent:
+            self._parent_win_id = self.parent.uid
+
         return res
 
 
@@ -637,7 +638,7 @@ class BaseWidget(object):
         
         :param User params: User to availuate the permissions.
         """
-        if hasattr(cls, 'AUTHORIZED_GROUPS'):
+        if hasattr(cls, 'AUTHORIZED_GROUPS') and cls.AUTHORIZED_GROUPS is not None:
             if user.is_superuser and 'superuser' in cls.AUTHORIZED_GROUPS: 
                 return True
             if user.groups.filter(name__in=cls.AUTHORIZED_GROUPS).exists():
@@ -773,6 +774,19 @@ class BaseWidget(object):
     def refresh_timeout(self, value): self._refresh_timeout = value
 
     
+    @property
+    def parent(self):
+        if hasattr(self, '_parent_win_id'):
+            return PyFormsMiddleware.get_instance(self._parent_win_id)
+        else:
+            return self._parent_win
+
+    @parent.setter
+    def parent(self, value):
+        if hasattr(self, '_parent_win_id'):
+            del self._parent_win_id
+        self._parent_win = value
+        self.mark_to_update_client()
 
     ############################################################################
     ############ WEB Properties ################################################
@@ -810,13 +824,13 @@ class PopupWindow(BaseWidget):
         BaseWidget.__init__(self, title, parent_win=parent_win)
         
         self._label = ControlLabel(default=msg)
-        #self._label.css = msg_type
+        self._label.field_css = msg_type
         buttons_formset = []
             
         if buttons:
             for i, b in enumerate(buttons):
                 name = 'button_{0}'.format(i)
-                setattr(self, name, ControlButton(b))
+                setattr(self, name, ControlButton(b, label_visible=False))
                 getattr(self, name ).value = make_lambda_func(handler, popup=self, button=b)
                 buttons_formset.append(name)
     

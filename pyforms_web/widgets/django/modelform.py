@@ -64,7 +64,6 @@ class ModelFormWidget(BaseWidget):
                 ])
             ]
     """
-
     MODEL             = None  #: class: Model to manage
     TITLE             = None  #: str: Title of the application
     INLINES           = []    #: list(class): Sub models to show in the interface
@@ -678,7 +677,7 @@ class ModelFormWidget(BaseWidget):
         :param django.db.models.Model obj: Object to update the values.
 
         Returns:
-            :django.db.models.Mode: Updated object.
+            :django.db.models.Model: Updated object.
         """
 
         # if it is working as an inline edition form #
@@ -915,7 +914,7 @@ class ModelFormWidget(BaseWidget):
 
         for field in self.model._meta.get_fields():
             if isinstance(field, models.ForeignKey):
-                if parent_model == field.related_model:
+                if issubclass(parent_model, field.related_model):
                     self.parent_field = field
                     break
 
@@ -997,7 +996,11 @@ class ModelFormWidget(BaseWidget):
                 except AttributeError:
                     continue
 
-            pyforms_field = None
+            if hasattr(field, "field"):
+                # follow relationships,e.g. ManyToManyRel
+                field = field.field
+
+            required = not field.blank and not field.has_default()
 
             if not (callable(field) and not isinstance(field, models.Model)):
                 label = get_lookup_verbose_name(self.model, field_name)
@@ -1005,20 +1008,20 @@ class ModelFormWidget(BaseWidget):
             # if it is a function
             if callable(field) and not isinstance(field, models.Model):
                 label = getattr(field, 'short_description') if hasattr(field, 'short_description') else field_name
-                pyforms_field = ControlText( label, readonly=True )
+                pyforms_field = ControlText( label, readonly=True, required=required )
                 self._callable_fields.append( field_name )
 
             # if it is read only
             elif field.name in self.readonly:
 
                 if isinstance(field, models.TextField):
-                    pyforms_field = ControlTextArea( label, readonly=True )
+                    pyforms_field = ControlTextArea( label, readonly=True, required=required )
                 else:
-                    pyforms_field = ControlText( label, readonly=True )
+                    pyforms_field = ControlText( label, readonly=True, required=required )
 
             # if it is AutoField
             elif isinstance(field, models.AutoField):
-                pyforms_field = ControlText( label, readonly=True )
+                pyforms_field = ControlText( label, readonly=True, required=required )
                 self._auto_fields.append( field_name )
 
 
@@ -1029,23 +1032,23 @@ class ModelFormWidget(BaseWidget):
                         (c[1], c[0])
                         for c in field.get_choices(include_blank=field.blank)
                     ],
-                    default=field.default
+                    default=field.default, required=required
                 )
-            elif isinstance(field, models.BigIntegerField):             pyforms_field = ControlInteger( label, default=field.default )
-            elif isinstance(field, models.BooleanField):                pyforms_field = ControlCheckBox( label, default=field.default )
-            elif isinstance(field, models.DateTimeField):               pyforms_field = ControlDateTime( label, default=field.default )
-            elif isinstance(field, models.DateField):                   pyforms_field = ControlDate( label, default=field.default )
-            elif isinstance(field, models.DecimalField):                pyforms_field = ControlDecimal( label, default=field.default )
-            elif isinstance(field, models.FileField):                   pyforms_field = ControlFileUpload( label, default=field.default )
-            elif isinstance(field, models.FloatField):                  pyforms_field = ControlFloat( label, default=field.default )
-            elif isinstance(field, models.ImageField):                  pyforms_field = ControlFileUpload( label, default=field.default )
-            elif isinstance(field, models.IntegerField):                pyforms_field = ControlInteger( label, default=field.default )
-            elif isinstance(field, models.TextField):                   pyforms_field = ControlTextArea( label, default=field.default )
+            elif isinstance(field, models.BigIntegerField):             pyforms_field = ControlInteger( label, default=field.default, required=required )
+            elif isinstance(field, models.BooleanField):                pyforms_field = ControlCheckBox( label, default=field.default, required=required )
+            elif isinstance(field, models.DateTimeField):               pyforms_field = ControlDateTime( label, default=field.default, required=required )
+            elif isinstance(field, models.DateField):                   pyforms_field = ControlDate( label, default=field.default, required=required )
+            elif isinstance(field, models.DecimalField):                pyforms_field = ControlDecimal( label, default=field.default, required=required )
+            elif isinstance(field, models.FileField):                   pyforms_field = ControlFileUpload( label, default=field.default, required=required )
+            elif isinstance(field, models.FloatField):                  pyforms_field = ControlFloat( label, default=field.default, required=required )
+            elif isinstance(field, models.ImageField):                  pyforms_field = ControlFileUpload( label, default=field.default, required=required )
+            elif isinstance(field, models.IntegerField):                pyforms_field = ControlInteger( label, default=field.default, required=required )
+            elif isinstance(field, models.TextField):                   pyforms_field = ControlTextArea( label, default=field.default, required=required )
             elif isinstance(field, models.NullBooleanField):
                 pyforms_field = ControlCombo(
                     label,
                     items=[('Unknown', None), ('Yes', True), ('No', False)],
-                    default=field.default
+                    default=field.default, required=required
                 )
             elif isinstance(field, models.ForeignKey):
                 query = field.related_model.objects.all()
@@ -1056,7 +1059,7 @@ class ModelFormWidget(BaseWidget):
                     label,
                     queryset=query,
                     queryset_filter=self.autocomplete_search,
-                    default=field.default
+                    default=field.default, required=required
                 )
             elif isinstance(field, models.ManyToManyField):
                 query = field.related_model.objects.all()
@@ -1067,12 +1070,12 @@ class ModelFormWidget(BaseWidget):
                     label,
                     queryset=query,
                     multiple=True,
-                    queryset_filter=self.autocomplete_search
+                    queryset_filter=self.autocomplete_search, required=required
                 )
             else:
                 default = None
                 if hasattr(field, 'default'): default = field.default
-                pyforms_field = ControlText( label, default=default )
+                pyforms_field = ControlText( label, default=default, required=required )
 
             # add the field to the application
             if pyforms_field is not None:
@@ -1208,7 +1211,7 @@ class ModelFormWidget(BaseWidget):
         """
         if self.model_object is None: return True
 
-        if hasattr(self, 'parent') and self.parent and not self.parent.has_view_permissions(self.model_object):
+        if hasattr(self, 'parent') and self.parent and not isinstance(self.parent, ModelFormWidget) and not self.parent.has_view_permissions(self.model_object):
             return False
 
         queryset = self.model.objects.filter(pk=self.object_pk)
@@ -1228,7 +1231,7 @@ class ModelFormWidget(BaseWidget):
         Returns:
             bool: True if has remove permissions, False otherwise.
         """
-        if hasattr(self, 'parent') and self.parent and not self.parent.has_remove_permissions(self.model_object):
+        if hasattr(self, 'parent') and self.parent and not isinstance(self.parent, ModelFormWidget) and not self.parent.has_remove_permissions(self.model_object):
             return False
 
         queryset = self.model.objects.filter(pk=self.object_pk)
@@ -1244,7 +1247,7 @@ class ModelFormWidget(BaseWidget):
         Returns:
             bool: True if has update permissions, False otherwise.
         """
-        if hasattr(self, 'parent') and self.parent and not self.parent.has_update_permissions(self.model_object):
+        if hasattr(self, 'parent') and self.parent and not isinstance(self.parent, ModelFormWidget) and not self.parent.has_update_permissions(self.model_object):
             return False
 
         queryset = self.model.objects.filter(pk=self.object_pk)

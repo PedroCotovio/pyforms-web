@@ -22,13 +22,14 @@ class ControlBase(object):
         :param bool readonly: Set the control as read only. Default = False.
         :param bool label_visible: Hide or show the label. Default = True.
         """
-        self.uid            = uuid.uuid4()
+        self.uid            = 'c'+str(uuid.uuid4())
         self._name          = ""    # variable name. It is updated in runtime
         self._parent        = None  # parent basewidget. It is updated in runtime
         self._update_client = False # flag that indicate if the Control should be updated
 
         self._help          = kwargs.get('helptext', None)
         self._value         = kwargs.get('default',  None)
+        self._required      = kwargs.get('required', False)
         self._label         = kwargs.get('label', args[0] if len(args)>0 else '')
         self._visible       = kwargs.get('visible', True)
         self._error         = kwargs.get('error', False)
@@ -127,7 +128,8 @@ class ControlBase(object):
             'visible':  self._visible,
             'error':    self._error,
             'enabled':  self._enabled,
-            'label_visible': self._label_visible
+            'label_visible': self._label_visible,
+            'required': self._required
         }
         if self._css is not None: 
             res.update({'css':self._css})

@@ -20,6 +20,7 @@ from .utils import get_fieldsets_strings
 import traceback
 from django.conf import settings
 from django.db import models
+from django.contrib.postgres import fields
 import os
 from confapp import conf
 
@@ -149,7 +150,7 @@ class ModelFormWidget(BaseWidget):
         self.parent_model = kwargs.get('parent_model', None)
 
         if self.parent_model and self.parent_pk:
-            self.__set_parent(self.parent_model, self.parent_pk)
+            self._set_parent(self.parent_model, self.parent_pk)
         #######################################################
 
         # Create the edit buttons buttons #####################
@@ -159,11 +160,11 @@ class ModelFormWidget(BaseWidget):
             self.edit_buttons.append( self._save_btn )
 
         if self._has_add_permissions:
-            self._create_btn = ControlButton(self.CREATE_BTN_LABEL, label_visible=False, default=self.__create_btn_event)
+            self._create_btn = ControlButton(self.CREATE_BTN_LABEL, label_visible=False, default=self._create_btn_event)
             self.edit_buttons.append( self._create_btn )
 
         if self._has_remove_permissions:
-            self._remove_btn = ControlButton(self.REMOVE_BTN_LABEL,  css='red basic', label_visible=False, default=self.__remove_btn_event)
+            self._remove_btn = ControlButton(self.REMOVE_BTN_LABEL, css='red basic', label_visible=False, default=self._remove_btn_event)
             self.edit_buttons.append( self._remove_btn )
 
         if self.has_cancel_btn:
@@ -388,7 +389,7 @@ class ModelFormWidget(BaseWidget):
 
         fields2show = self.get_visible_fields_names()
 
-        self.__update_related_fields()
+        self._update_related_fields()
 
         # clear all the fields present in the model
         for field_name in fields2show:
@@ -471,7 +472,7 @@ class ModelFormWidget(BaseWidget):
         for field in self.inlines_controls: field.show()
         if self._has_add_permissions:      self._create_btn.hide()
 
-        self.__update_related_fields()
+        self._update_related_fields()
 
         obj = self.model_object
         fields2show = self.get_visible_fields_names()
@@ -946,7 +947,7 @@ class ModelFormWidget(BaseWidget):
     #### PRIVATE FUNCTIONS ##########################################################
     #################################################################################
 
-    def __set_parent(self, parent_model, parent_pk):
+    def _set_parent(self, parent_model, parent_pk):
         """
         Set the form to work as inline
 
@@ -989,7 +990,7 @@ class ModelFormWidget(BaseWidget):
         return [field for field in fields if field is not None]
 
 
-    def __update_related_fields(self):
+    def _update_related_fields(self):
         """
         Update all related fields
         """
@@ -1057,7 +1058,7 @@ class ModelFormWidget(BaseWidget):
             # if it is read only
             elif field.name in self.readonly:
 
-                if isinstance(field, (models.TextField, models.JSONField)):
+                if isinstance(field, (models.TextField, fields.JSONField)):
                     pyforms_field = ControlTextArea( label, readonly=True, required=required, helptext=field.help_text)
                 else:
                     pyforms_field = ControlText( label, readonly=True, required=required, helptext=field.help_text )
@@ -1094,7 +1095,7 @@ class ModelFormWidget(BaseWidget):
                                                helptext=field.help_text)
             elif isinstance(field, models.SmallIntegerField):   pyforms_field = ControlInteger(label, default=field.default, required=required, helptext=field.help_text)
             elif isinstance(field, models.TextField):           pyforms_field = ControlTextArea( label, default=field.default, required=required, helptext=field.help_text )
-            elif isinstance(field, models.JSONField):
+            elif isinstance(field, fields.JSONField):
                 pyforms_field = ControlTextArea(label, default=field.default, required=required, helptext=field.help_text)
             elif isinstance(field, models.NullBooleanField):
                 pyforms_field = ControlCombo(
@@ -1156,7 +1157,7 @@ class ModelFormWidget(BaseWidget):
         self.formset = self.formset + self.get_buttons_row()
 
 
-    def __create_btn_event(self):
+    def _create_btn_event(self):
         """
         Event called by the create button
         """
@@ -1175,7 +1176,7 @@ class ModelFormWidget(BaseWidget):
 
         if obj is None:
             # The object is None, call the create event
-            self.__create_btn_event()
+            self._create_btn_event()
             return
 
         else:
@@ -1186,7 +1187,7 @@ class ModelFormWidget(BaseWidget):
             self.save_form_event(obj)
 
 
-    def __remove_btn_event(self):
+    def _remove_btn_event(self):
         """
         Event called by the remove button
         """

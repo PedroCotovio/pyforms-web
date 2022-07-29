@@ -130,7 +130,7 @@ class ModelAdminWidget(BaseWidget):
                 ),
             ]
 
-        self._list.item_selection_changed_event = self.__list_item_selection_changed_event
+        self._list.item_selection_changed_event = self._list_item_selection_changed_event
 
         # if it is a inline app, add the title to the header
 
@@ -169,7 +169,7 @@ class ModelAdminWidget(BaseWidget):
         """
             Function called to configure the CONTROL_LIST to display the data
         """
-        self._list.value = self.__get_queryset()
+        self._list.value = self._get_queryset()
         # force the list to be updated
         self._list.mark_to_update_client()
 
@@ -411,7 +411,7 @@ class ModelAdminWidget(BaseWidget):
     #### PRIVATE FUNCTIONS ##########################################################
     #################################################################################
 
-    def __list_item_selection_changed_event(self):
+    def _list_item_selection_changed_event(self):
         """
         Event called when a row is selected. It shows the edition for row.
         """
@@ -425,7 +425,7 @@ class ModelAdminWidget(BaseWidget):
             else:
                 raise Exception('You do not have permissions to visualize this record.')
 
-    def __get_queryset(self):
+    def _get_queryset(self):
         """
 
         """

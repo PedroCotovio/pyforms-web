@@ -39,7 +39,6 @@ requirements = [
     'Pillow',
     'python-dateutil',
     'confapp',
-    'django~=4.0'
 ]
 
 #############################################################
